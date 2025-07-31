@@ -1,9 +1,10 @@
 import deps
 from fasthtml.common import *
-from .pages.home import home_pages
-from .task.feelback import clientMq
+
 from .cruds.feelback import CrudFeelback
-from .schemas import AddFeelback, UserId, DeleteFeelback
+from .pages.home import home_pages
+from .schemas import AddFeelback, DeleteFeelback, UserId
+from .task.feelback import clientMq
 
 PLUGIN_INFO = {
     "name": "Feelback",
@@ -16,7 +17,7 @@ PLUGIN_INFO = {
     "author_url": "git:traoreera",
 }
 
-router = APIRouter(
+router = deps.APIRouter(
     prefix=PLUGIN_INFO["Api_prefix"],
 )
 
@@ -30,13 +31,13 @@ class Plugin:
         pass
 
     @router("/", methods=["GET"])
-    @deps.user_validation
+    # @deps.user_validation
     def run(session, request: Request):
         print(request.url)
         return home_pages.page()
 
     @router("/refresh", methods=["GET"])
-    @deps.user_validation
+    # @deps.user_validation
     def refrech(session, request: Request):
         response = OPTIONS.CRUD.get_all_(feelback=UserId(user_id=session["user_id"]))
         return {
@@ -50,7 +51,7 @@ class Plugin:
         }
 
     @router("/add", methods=["POST"])
-    @deps.user_validation
+    # @deps.user_validation
     def add_topic(session, request: Request, nom: str, localite: str):
         OPTIONS.CRUD.add(
             feelback=AddFeelback(
@@ -61,7 +62,7 @@ class Plugin:
         return {"success": True}
 
     @router("/delete/{id}", methods=["GET"])
-    # @deps.user_validation
+    # #@deps.user_validation
     def remove(session, request: Request, id: str):
         try:
             print(id)
