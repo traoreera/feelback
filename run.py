@@ -1,8 +1,8 @@
 import deps
-from fasthtml.common import *
+from fasthtml.common import Request
 
 from .cruds.feelback import CrudFeelback
-from .pages.home import home_pages
+from .pages import statics
 from .schemas import AddFeelback, DeleteFeelback, UserId
 from .task.feelback import clientMq
 
@@ -21,6 +21,8 @@ router = deps.APIRouter(
     prefix=PLUGIN_INFO["Api_prefix"],
 )
 
+static = statics.StaticFile()
+
 
 class OPTIONS:
     CRUD = CrudFeelback()
@@ -33,8 +35,7 @@ class Plugin:
     @router("/", methods=["GET"])
     # @deps.user_validation
     def run(session, request: Request):
-        print(request.url)
-        return home_pages.page()
+        return static.file[0]
 
     @router("/refresh", methods=["GET"])
     # @deps.user_validation
@@ -65,11 +66,28 @@ class Plugin:
     # #@deps.user_validation
     def remove(session, request: Request, id: str):
         try:
-            print(id)
-            response = OPTIONS.CRUD.remove(
+            OPTIONS.CRUD.remove(
                 feelback=DeleteFeelback(user_id=session["user_id"], feelback_id=id)
             )
             return
-        except Exception as e:
-            print(e)
+        except Exception:
             pass
+
+    @router("/avis/{fellback_id}", methods=["GET"])
+    def feelback_avis(session, request: Request, fellback_id: str):
+
+        if response := True:
+
+            return f"""
+            <form action="/app/feelback/avis/{response}" method="POST">
+            <input type="text" name="avis" placeholder="Votre avis" id="avis", required>
+            <input type="submit" value="Envoyer">
+            </form>
+            """
+
+        else:
+            return f""" 404 Not Found: {fellback_id} not found in database"""
+
+    @router("/avis/{feelback_id}", methods=["POST"])
+    def feelback_avis_posting(session, request: Request, feelback_id: str, avis: str):
+        print(avis, feelback_id)
