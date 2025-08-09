@@ -1,6 +1,20 @@
-from core.composants import *
-from fasthtml.common import *
 from deps import AllPage
+from fasthtml.common import (
+    H2,
+    H3,
+    Button,
+    Canvas,
+    Div,
+    Form,
+    I,
+    Input,
+    Label,
+    Link,
+    Meta,
+    Script,
+    Section,
+    Title,
+)
 
 
 class FeelBackHome:
@@ -35,7 +49,7 @@ class FeelBackHome:
                 {
                     "name": "Home Lock",
                     "url": "/app/locket",
-                }
+                },
             ],
             content=[
                 Div(
@@ -43,8 +57,8 @@ class FeelBackHome:
                         H2("Tableau par 12 mois"),
                         Canvas(
                             id="lignegraph",
-                            #height="400",
-                            #style="""display: block; box-sizing: border-box; height: 400px; width: 992px;""",
+                            # height="400",
+                            # style="""display: block; box-sizing: border-box; height: 400px; width: 992px;""",
                         ),
                         id="bare",
                         cls="chart",
@@ -111,4 +125,4 @@ class FeelBackHome:
         return self.html.page()
 
 
-home_pages = FeelBackHome()
+feelBackHome = FeelBackHome()

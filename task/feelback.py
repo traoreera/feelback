@@ -1,8 +1,9 @@
-from paho import mqtt
 import paho.mqtt.client as paho
+from paho import mqtt
+
 from ..config import MQTTConfig
-from ..schemas import UpdateFeelback
 from ..cruds.feelback import CrudFeelback
+from ..schemas import UpdateFeelback
 
 
 class OPTIONS:
@@ -26,18 +27,21 @@ class MqttClient:
         self.loop: bool = True
 
     def on_connect(self, client, userdata, flags, rc, properties=None):
-        print(f"[{flags['session present']}]-> broker feelback [mqtt] connecte. status: {rc}")
+        print(
+            f"[{flags['session present']}]-> broker feelback [mqtt] connecte. status: {rc}"
+        )
         # S'abonner au topic "hey" lors de la connexion
         client.subscribe("#", qos=2)
 
     def on_message(self, client, userdata, msg):
         content = msg.topic.split("/")
+        print(content, msg.payload.decode())
         OPTIONS.CRUD.update(
             feelback=UpdateFeelback(
                 user_id=content[1], topic=content[0], message=msg.payload.decode()
             )
         )
-        
+
     def publish(self, topic: str):
         self.client.publish(topic=topic)
 
@@ -51,3 +55,5 @@ class MqttClient:
 
 
 clientMq = MqttClient()
+
+print("Feelback MQTT client initialized")

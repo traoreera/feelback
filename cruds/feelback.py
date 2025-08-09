@@ -1,6 +1,7 @@
 import deps
+
 from ..models.feelbacks import Feelbacks
-from ..schemas import AddFeelback, UserId, UpdateFeelback, DeleteFeelback
+from ..schemas import AddFeelback, DeleteFeelback, Feelback, UpdateFeelback, UserId
 
 
 class CrudFeelback:
@@ -42,7 +43,11 @@ class CrudFeelback:
             return False
 
     def update(self, feelback: UpdateFeelback):
-        response = self.db.query(Feelbacks).filter(Feelbacks.user_id == feelback.user_id).first()
+        response = (
+            self.db.query(Feelbacks)
+            .filter(Feelbacks.user_id == feelback.user_id)
+            .first()
+        )
         if response:
             if feelback.message == "bad":
                 response.bad += 1
@@ -74,3 +79,26 @@ class CrudFeelback:
 
         # sourcery skip: or-if-exp-identity
         return response if response else None
+
+    def get_element_by_id(self, feelback: Feelback):
+        response = (
+            self.db.query(Feelbacks)
+            .filter(Feelbacks.user_id == feelback.user_id)
+            .filter(Feelbacks.id == feelback.feelback_id)
+            .first()
+        )
+        return response.responseModel() if response else None
+
+        # sourcery skip: or-if-exp-identity
+
+    def donute(self, feelback: Feelback):
+        # return total of bad good midle vote filter by user_id
+        if response := (
+            self.db.query(Feelbacks).filter(Feelbacks.user_id == feelback.user_id).all()
+        ):
+            midle = [i.middle for i in response]
+            bad = [i.bad for i in response]
+            good = [i.good for i in response]
+            return [sum(midle), sum(bad), sum(good)]
+        else:
+            return [0, 0, 0]

@@ -14,6 +14,10 @@ class UserId(deps.BaseModel):
     user_id: str
 
 
+class Feelback(deps.BaseModel):
+    feelback_id: str
+    user_id: str
+
 
 class DeleteFeelback(UserId):
     feelback_id: str

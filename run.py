@@ -2,8 +2,8 @@ import deps
 from fasthtml.common import Request
 
 from .cruds.feelback import CrudFeelback
-from .pages import statics
-from .schemas import AddFeelback, DeleteFeelback, UserId
+from .pages.home import feelBackHome
+from .schemas import AddFeelback, DeleteFeelback, Feelback
 from .task.feelback import clientMq
 
 PLUGIN_INFO = {
@@ -21,8 +21,6 @@ router = deps.APIRouter(
     prefix=PLUGIN_INFO["Api_prefix"],
 )
 
-static = statics.StaticFile()
-
 
 class OPTIONS:
     CRUD = CrudFeelback()
@@ -35,21 +33,15 @@ class Plugin:
     @router("/", methods=["GET"])
     # @deps.user_validation
     def run(session, request: Request):
-        return static.file[0]
+        return feelBackHome.page()
 
     @router("/refresh", methods=["GET"])
     # @deps.user_validation
     def refrech(session, request: Request):
-        response = OPTIONS.CRUD.get_all_(feelback=UserId(user_id=session["user_id"]))
-        return {
-            "table": {
-                "bad": [1, 2, 34, 45, 23, 9, 50, 0, 23, 90, 40, 13],
-                "midle": [1, 2, 34, 45, 29, 3, 40, 4, 30, 92, 30, 23],
-                "good": [1, 2, 34, 45, 25, 2, 0, 3, 20, 2, 34, 3],
-            },
-            "donute": [100, 200, 300],
-            "cards": response,
-        }
+        response = OPTIONS.CRUD.donute(
+            feelback=Feelback(user_id=session["user_id"], feelback_id=1)
+        )
+        return response
 
     @router("/add", methods=["POST"])
     # @deps.user_validation
