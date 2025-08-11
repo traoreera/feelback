@@ -37,6 +37,7 @@ class AddAvis(deps.BaseModel):
     identite: str
     avis: str
     feelback_id: str
+    user_id: str
 
 
 class FeelbackAvis(deps.BaseModel):

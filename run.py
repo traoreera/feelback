@@ -2,8 +2,9 @@ import deps
 from fasthtml.common import Request
 
 from .cruds.feelback import CrudFeelback
+from .pages.avis import avisPage
 from .pages.home import feelBackHome
-from .schemas import AddFeelback, DeleteFeelback, Feelback
+from .schemas import AddAvis, AddFeelback, DeleteFeelback, Feelback, UserId
 from .task.feelback import clientMq
 
 PLUGIN_INFO = {
@@ -31,20 +32,27 @@ class Plugin:
         pass
 
     @router("/", methods=["GET"])
-    # @deps.user_validation
+    @deps.user_validation
     def run(session, request: Request):
         return feelBackHome.page()
 
     @router("/refresh", methods=["GET"])
-    # @deps.user_validation
+    @deps.user_validation
     def refrech(session, request: Request):
-        response = OPTIONS.CRUD.donute(
-            feelback=Feelback(user_id=session["user_id"], feelback_id=1)
-        )
-        return response
+        response = OPTIONS.CRUD.get_all_(feelback=UserId(user_id=session["user_id"]))
+
+        return {
+            "table": {
+                "bad": [1, 2, 34, 45, 23, 9, 50, 0, 23, 90, 40, 13],
+                "midle": [1, 2, 34, 45, 29, 3, 40, 4, 30, 92, 30, 23],
+                "good": [1, 2, 34, 45, 25, 2, 0, 3, 20, 2, 34, 3],
+            },
+            "donute": OPTIONS.CRUD.donute(feelback=UserId(user_id=session["user_id"])),
+            "cards": response,
+        }
 
     @router("/add", methods=["POST"])
-    # @deps.user_validation
+    @deps.user_validation
     def add_topic(session, request: Request, nom: str, localite: str):
         OPTIONS.CRUD.add(
             feelback=AddFeelback(
@@ -55,7 +63,7 @@ class Plugin:
         return {"success": True}
 
     @router("/delete/{id}", methods=["GET"])
-    # #@deps.user_validation
+    @deps.user_validation
     def remove(session, request: Request, id: str):
         try:
             OPTIONS.CRUD.remove(
@@ -65,21 +73,27 @@ class Plugin:
         except Exception:
             pass
 
-    @router("/avis/{fellback_id}", methods=["GET"])
-    def feelback_avis(session, request: Request, fellback_id: str):
-
-        if response := True:
-
-            return f"""
-            <form action="/app/feelback/avis/{response}" method="POST">
-            <input type="text" name="avis" placeholder="Votre avis" id="avis", required>
-            <input type="submit" value="Envoyer">
-            </form>
-            """
+    @router("/avis/{fellback_id}", methods=["GET", "POST"])
+    def feelback_avis(
+        session, request: Request, fellback_id: str, avis: str = "", identite: str = ""
+    ):
+        if response := OPTIONS.CRUD.get_user_with_feelback(
+            feelback=Feelback(feelback_id=fellback_id, user_id=session["user_id"])
+        ):
+            if request.method == "GET":
+                return avisPage.page()
+            elif request.method == "POST":
+                OPTIONS.CRUD.addAvis(
+                    avis=AddAvis(
+                        identite=identite,
+                        avis=avis,
+                        feelback_id=fellback_id,
+                        user_id=response,
+                    )
+                )
+                return avisPage.afterSubmit()
 
         else:
-            return f""" 404 Not Found: {fellback_id} not found in database"""
+            return avisPage.notFound()
 
-    @router("/avis/{feelback_id}", methods=["POST"])
-    def feelback_avis_posting(session, request: Request, feelback_id: str, avis: str):
-        print(avis, feelback_id)
+        return {"success": True}

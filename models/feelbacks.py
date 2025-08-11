@@ -1,4 +1,5 @@
 import deps  # core dependance for application
+
 from ..schemas import AddFeelback
 
 
@@ -50,3 +51,31 @@ class Feelbacks(deps.Base):
             "neutral": self.middle,
             "unhappy": self.bad,
         }
+
+
+class Avis(deps.Base):
+    __tablename__ = "avis"
+
+    # for iditification
+    id = deps.Column(deps.String, primary_key=True, index=True, unique=True)
+    feelback_id = deps.Column(deps.String, nullable=False, index=True)
+    user_id = deps.Column(deps.String, nullable=False, index=True)
+    # for data
+    identite = deps.Column(deps.String, nullable=False)
+
+    avis = deps.Column(deps.Text, nullable=False)
+
+    def __init__(self, identite: str, avis: str, feelback_id: str, user_id: str):
+        self.identite = identite
+        self.feelback_id = feelback_id
+        self.user_id = user_id
+        self.avis = avis
+        self.id = deps.make_ids()
+
+    def responseModel(self):
+        return {
+            "id": self.id,
+            "identite": self.identite,
+            "avis": self.avis,
+        }
+        # Add any other fields you want to return in the response

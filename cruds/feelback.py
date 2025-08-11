@@ -1,7 +1,14 @@
 import deps
 
-from ..models.feelbacks import Feelbacks
-from ..schemas import AddFeelback, DeleteFeelback, Feelback, UpdateFeelback, UserId
+from ..models.feelbacks import Avis, Feelbacks
+from ..schemas import (
+    AddAvis,
+    AddFeelback,
+    DeleteFeelback,
+    Feelback,
+    UpdateFeelback,
+    UserId,
+)
 
 
 class CrudFeelback:
@@ -89,9 +96,18 @@ class CrudFeelback:
         )
         return response.responseModel() if response else None
 
+    def get_feelback_for_avis_with_id(self, feelback: Feelback):
+        response = (
+            self.db.query(Feelbacks)
+            .filter(Feelbacks.user_id == feelback.user_id)
+            .first()
+        )
+
+        return response.user_id if response else None
+
         # sourcery skip: or-if-exp-identity
 
-    def donute(self, feelback: Feelback):
+    def donute(self, feelback: UserId):
         # return total of bad good midle vote filter by user_id
         if response := (
             self.db.query(Feelbacks).filter(Feelbacks.user_id == feelback.user_id).all()
@@ -102,3 +118,35 @@ class CrudFeelback:
             return [sum(midle), sum(bad), sum(good)]
         else:
             return [0, 0, 0]
+
+    def get_user_with_feelback(self, feelback: Feelback):
+        response = (
+            self.db.query(Feelbacks)
+            .filter(Feelbacks.id == feelback.feelback_id)
+            .first()
+        )
+        return response.user_id if response else None
+
+    def addAvis(self, avis: AddAvis):
+        try:
+            self.db.add(
+                Avis(
+                    identite=avis.identite,
+                    avis=avis.avis,
+                    user_id=avis.user_id,
+                    feelback_id=avis.feelback_id,
+                )
+            )
+            self.db.commit()
+        except Exception:
+            self.for_rollback()
+            return False
+
+    def get_avis(self, feelback: Feelback):
+        response = (
+            self.db.query(Avis)
+            .filter(Avis.feelback_id == feelback.feelback_id)
+            .filter(Avis.user_id == feelback.user_id)
+            .all()
+        )
+        return [i.responseModel() for i in response] if response else None
