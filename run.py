@@ -78,7 +78,7 @@ class Plugin:
         session, request: Request, fellback_id: str, avis: str = "", identite: str = ""
     ):
         if response := OPTIONS.CRUD.get_user_with_feelback(
-            feelback=Feelback(feelback_id=fellback_id, user_id=session["user_id"])
+            feelback=Feelback(feelback_id=fellback_id, user_id="")
         ):
             if request.method == "GET":
                 return avisPage.page()
