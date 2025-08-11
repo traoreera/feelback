@@ -31,3 +31,16 @@ class UpdateFeelback(deps.BaseModel):
 
 class GetFeelback(deps.BaseModel):
     user_id: str
+
+
+class AddAvis(deps.BaseModel):
+    identite: str
+    avis: str
+    feelback_id: str
+
+
+class FeelbackAvis(deps.BaseModel):
+    user_id: str
+    identite: str
+    avis: str
+    feelback_id: str
