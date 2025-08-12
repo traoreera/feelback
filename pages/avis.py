@@ -13,6 +13,7 @@ from fasthtml.common import (
     Link,
     Meta,
     P,
+    Script,
     Section,
     Span,
     Style,
@@ -126,6 +127,31 @@ class Avis:
                     A("Retour à l'Accueil", href="https://app.tangagroup.com"),
                     cls="container",
                 )
+            ),
+            lang="fr",
+        )
+
+    def listAvis(self):
+
+        return Html(
+            Head(
+                Meta(charset="UTF-8"),
+                Meta(name="viewport", content="width=device-width, initial-scale=1.0"),
+                Title("Avis des Utilisateurs"),
+                Style(
+                    'body {\r\n            font-family: Arial, sans-serif;\r\n            margin: 0;\r\n            display: flex;\r\n            background-color: #f4f4f4;\r\n        }\r\n        .sidebar {\r\n            width: 200px;\r\n            background: #2c333a;\r\n            color: white;\r\n            padding: 20px;\r\n            height: 100vh;\r\n        }\r\n        .sidebar h2 {\r\n            color: white;\r\n        }\r\n        .sidebar a {\r\n            color: white;\r\n            text-decoration: none;\r\n            display: block;\r\n            margin: 10px 0;\r\n        }\r\n        .sidebar a:hover {\r\n            text-decoration: underline;\r\n        }\r\n        .container {\r\n            flex: 1;\r\n            padding: 20px;\r\n            background: white;\r\n            border-radius: 8px;\r\n            margin-left: 20px;\r\n        }\r\n        h1 {\r\n            text-align: center;\r\n            color: #333;\r\n        }\r\n        .section {\r\n            margin: 20px 0;\r\n            border: 1px solid #ddd;\r\n            border-radius: 4px;\r\n            padding: 10px;\r\n        }\r\n        .review {\r\n            border-bottom: 1px solid #ddd;\r\n            padding: 10px 0;\r\n        }\r\n        .review:last-child {\r\n            border-bottom: none;\r\n        }\r\n        .review p {\r\n            margin: 5px 0;\r\n            color: #555;\r\n        }\r\n        .form-group {\r\n            margin: 20px 0;\r\n        }\r\n        input[type="text"],\r\n        textarea {\r\n            width: 100%;\r\n            padding: 10px;\r\n            margin-top: 5px;\r\n            border: 1px solid #ccc;\r\n            border-radius: 4px;\r\n        }\r\n        button {\r\n            width: 100%;\r\n            padding: 10px;\r\n            background-color: #007BFF;\r\n            color: white;\r\n            border: none;\r\n            border-radius: 4px;\r\n            cursor: pointer;\r\n        }\r\n        button:hover {\r\n            background-color: #0056b3;\r\n        }'
+                ),
+            ),
+            Body(
+                Div(H2("Feelbacks"), Div(id="section-links"), cls="sidebar"),
+                Div(
+                    H1("Avis des Utilisateurs de votre service"),
+                    Div(id="review-sections"),
+                    cls="container",
+                ),
+                Script(
+                    "// Exemple de données d'avis\r\n    async function fetchData() {\r\n        const response = await fetch('avisList');\r\n        return await response.json();\r\n    }\r\n\r\n    let data;\r\n\r\n    // Fonction pour générer dynamiquement les liens des sections\r\n    function generateSectionLinks() {\r\n        const sectionLinks = document.getElementById('section-links');\r\n        sectionLinks.innerHTML = ''; // Réinitialiser le contenu\r\n\r\n        for (const section in data) {\r\n            const link = document.createElement('a');\r\n            link.href = `#${section}`;\r\n            link.innerText = section.charAt(0).toUpperCase() + section.slice(1);\r\n            link.onclick = () => showSection(section);\r\n            sectionLinks.appendChild(link);\r\n        }\r\n    }\r\n\r\n    // Fonction pour afficher les avis d'une section\r\n    function displayReviews(section) {\r\n        const reviewSections = document.getElementById('review-sections');\r\n        reviewSections.innerHTML = ''; // Réinitialiser le contenu\r\n\r\n        const sectionDiv = document.createElement('div');\r\n        sectionDiv.classList.add('section');\r\n        sectionDiv.innerHTML = `<h3>${section.charAt(0).toUpperCase() + section.slice(1)}</h3>`; // Titre de la section\r\n\r\n        data[section].forEach(review => {\r\n            const reviewDiv = document.createElement('div');\r\n            reviewDiv.classList.add('review');\r\n            reviewDiv.innerHTML = `<strong>${review.name}</strong><p>${review.text}</p>`;\r\n            sectionDiv.appendChild(reviewDiv);\r\n        });\r\n\r\n        reviewSections.appendChild(sectionDiv);\r\n    }\r\n\r\n    // Afficher la première section par défaut\r\n    function showSection(section) {\r\n        displayReviews(section);\r\n    }\r\n\r\n    // Appel de la fonction pour générer les liens et afficher la première section\r\n    window.onload = async () => {\r\n        data = await fetchData();\r\n        generateSectionLinks();\r\n        showSection(Object.keys(data)[0]); // Afficher la première section\r\n    };\r\n\r\n    // Gestion de la soumission de l'avis\r\n    document.getElementById('submit-review').addEventListener('click', function() {\r\n        const name = document.getElementById('name').value;\r\n        const reviewText = document.getElementById('review').value;\r\n        const section = document.querySelector('.sidebar a.active')?.getAttribute('href').substring(1) || Object.keys(data)[0];\r\n\r\n        if (name && reviewText) {\r\n            // Ajouter l'avis à la section appropriée\r\n            data[section].push({ name, text: reviewText });\r\n            displayReviews(section); // Mettre à jour l'affichage\r\n            document.getElementById('name').value = '';\r\n            document.getElementById('review').value = '';\r\n        } else {\r\n            alert('Veuillez remplir tous les champs.');\r\n        }\r\n    });"
+                ),
             ),
             lang="fr",
         )

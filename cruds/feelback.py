@@ -1,3 +1,5 @@
+import functools
+
 import deps
 
 from ..models.feelbacks import Avis, Feelbacks
@@ -11,81 +13,81 @@ from ..schemas import (
 )
 
 
+# ---------------------
+# Décorateur transactionnel
+# ---------------------
+def transactional(commit: bool = True, refresh: bool = False):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            try:
+                result = func(self, *args, **kwargs)
+                if commit:
+                    self.db.commit()
+                if refresh and result is not None:
+                    self.db.refresh(result)
+                return result
+            except Exception:
+                self.db.rollback()
+                return False
+
+        return wrapper
+
+    return decorator
+
+
 class CrudFeelback:
     def __init__(self):
         self.model = Feelbacks
         self.db: deps.Session = deps.db
 
-    def for_refresh(self, feelback: AddFeelback):
-        try:
-            self.db.refresh(feelback)
-            return True
-        except Exception:
-            self.for_rollback()
-            return False
-
-    def for_rollback(self):
-        return self.db.rollback()
-
+    # ---------------------
+    # CRUD Feelbacks
+    # ---------------------
+    @transactional(commit=True, refresh=True)
     def add(self, feelback: AddFeelback):
         try:
             self.db.add(Feelbacks(feelback=feelback))
-            return self._extracted_from_update_4(feelback)
+            self.db.commit()
+            return
         except Exception:
-            self.for_rollback()
+            self.db.rollback()
             return False
 
+    @transactional()
     def remove(self, feelback: DeleteFeelback):
-        if (
+        deleted = (
             self.db.query(Feelbacks)
             .filter(Feelbacks.id == feelback.feelback_id)
             .filter(Feelbacks.user_id == feelback.user_id)
             .delete()
-        ):
-            self.db.commit()
-            return True
+        )
+        return bool(deleted)
 
-        else:
-            self.for_rollback()
-            return False
-
+    @transactional()
     def update(self, feelback: UpdateFeelback):
         response = (
             self.db.query(Feelbacks)
             .filter(Feelbacks.user_id == feelback.user_id)
             .first()
         )
-        if response:
-            if feelback.message == "bad":
-                response.bad += 1
-            if feelback.message == "good":
-                response.good += 1
-            if feelback.message == "midle":
-                response.middle += 1
-            self.db.commit()
+        if not response:
+            return False
 
-    # TODO Rename this here and in `add` and `update`
-    def _extracted_from_update_4(self, feelback):
-        return self._extracted_from__extracted_from_update_4_15(feelback)
-
-    # TODO Rename this here and in `update` and `_extracted_from_update_4`
-    def _extracted_from__extracted_from_update_4_15(self, arg0):
-        self.db.commit()
-        self.for_refresh(arg0)
-        return True
+        mapping = {"bad": "bad", "good": "good", "midle": "middle"}
+        if feelback.message in mapping:
+            field = mapping[feelback.message]
+            setattr(response, field, getattr(response, field) + 1)
+            return True
+        return False
 
     def get_all_(self, feelback: UserId):
-        response = [
+        return [
             i.responseModel()
-            for i in (
-                self.db.query(Feelbacks)
-                .filter(Feelbacks.user_id == feelback.user_id)
-                .all()
-            )
+            for i in self.db.query(Feelbacks)
+            .filter(Feelbacks.user_id == feelback.user_id)
+            .all()
         ]
-
-        # sourcery skip: or-if-exp-identity
-        return response if response else None
 
     def get_element_by_id(self, feelback: Feelback):
         response = (
@@ -102,22 +104,19 @@ class CrudFeelback:
             .filter(Feelbacks.user_id == feelback.user_id)
             .first()
         )
-
         return response.user_id if response else None
 
-        # sourcery skip: or-if-exp-identity
-
     def donute(self, feelback: UserId):
-        # return total of bad good midle vote filter by user_id
-        if response := (
+        response = (
             self.db.query(Feelbacks).filter(Feelbacks.user_id == feelback.user_id).all()
-        ):
-            midle = [i.middle for i in response]
-            bad = [i.bad for i in response]
-            good = [i.good for i in response]
-            return [sum(midle), sum(bad), sum(good)]
-        else:
+        )
+        if not response:
             return [0, 0, 0]
+        return [
+            sum(i.middle for i in response),
+            sum(i.bad for i in response),
+            sum(i.good for i in response),
+        ]
 
     def get_user_with_feelback(self, feelback: Feelback):
         response = (
@@ -127,26 +126,52 @@ class CrudFeelback:
         )
         return response.user_id if response else None
 
+    # ---------------------
+    # CRUD Avis
+    # ---------------------
+    @transactional(commit=True, refresh=True)
     def addAvis(self, avis: AddAvis):
-        try:
-            self.db.add(
-                Avis(
-                    identite=avis.identite,
-                    avis=avis.avis,
-                    user_id=avis.user_id,
-                    feelback_id=avis.feelback_id,
-                )
-            )
-            self.db.commit()
-        except Exception:
-            self.for_rollback()
-            return False
+        obj = Avis(**avis.dict())
+        self.db.add(obj)
+        return obj
 
-    def get_avis(self, feelback: Feelback):
-        response = (
-            self.db.query(Avis)
-            .filter(Avis.feelback_id == feelback.feelback_id)
-            .filter(Avis.user_id == feelback.user_id)
-            .all()
-        )
-        return [i.responseModel() for i in response] if response else None
+    def get_avis(self, feelback: UserId):
+        avis_list = self.db.query(Avis).filter(Avis.user_id == feelback.user_id).all()
+        feelbacks = self.get_all_(feelback)
+        avis_res = [i.responseModel() for i in avis_list]
+        print(avis_res)
+        return avis_res, feelbacks
+
+    # ---------------------
+    # 📌 Nouveau : Feedbacks groupés par feelback_id
+    # ---------------------
+    def get_feedbacks_grouped(self, user_id: UserId):
+        """
+        Retourne les avis groupés par nom de section (récupéré depuis Feelbacks)
+        pour un utilisateur donné :
+        {
+            "nom_section": [{name, text}, ...]
+        }
+        """
+        # Récupère tous les avis pour cet utilisateur
+        all_avis = self.db.query(Avis).filter(Avis.user_id == user_id.user_id).all()
+
+        grouped = {}
+
+        for avis in all_avis:
+            # On récupère le feelback correspondant pour avoir son nom
+            feelback = (
+                self.db.query(Feelbacks)
+                .filter(Feelbacks.id == avis.feelback_id)
+                .first()
+            )
+
+            # Nom de section => si pas trouvé on met "Inconnu"
+            section_name = getattr(feelback, "topic", "Inconnu")
+
+            if section_name not in grouped:
+                grouped[section_name] = []
+
+            grouped[section_name].append({"name": avis.identite, "text": avis.avis})
+
+        return grouped

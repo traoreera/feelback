@@ -1,5 +1,5 @@
 import deps
-from fasthtml.common import Request
+from fasthtml.common import JSONResponse, Request
 
 from .cruds.feelback import CrudFeelback
 from .pages.avis import avisPage
@@ -97,3 +97,22 @@ class Plugin:
             return avisPage.notFound()
 
         return {"success": True}
+
+    @router("/avisList", methods=["GET"])
+    @deps.user_validation
+    def avis(session, request: Request):
+
+        return JSONResponse(
+            content=OPTIONS.CRUD.get_feedbacks_grouped(
+                user_id=UserId(user_id=session["user_id"])
+            ),
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+            media_type="application/json",
+        )
+
+    @router("/avis", methods=["GET"])
+    @deps.user_validation
+    def avisList(session, request: Request):
+
+        return avisPage.listAvis()

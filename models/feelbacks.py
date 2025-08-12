@@ -74,8 +74,8 @@ class Avis(deps.Base):
 
     def responseModel(self):
         return {
-            "id": self.id,
-            "identite": self.identite,
-            "avis": self.avis,
+            "name": self.identite,
+            "text": self.avis,
+            "user_id": self.user_id,
         }
         # Add any other fields you want to return in the response
