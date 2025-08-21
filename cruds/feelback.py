@@ -69,6 +69,7 @@ class CrudFeelback:
         response = (
             self.db.query(Feelbacks)
             .filter(Feelbacks.user_id == feelback.user_id)
+            .filter(Feelbacks.topic == feelback.topic)
             .first()
         )
         if not response:
