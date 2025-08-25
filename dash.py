@@ -1,4 +1,5 @@
 from fasthtml.common import *
+
 import deps
 
 dash = APIRouter("/admins/feelback")

@@ -1,5 +1,6 @@
+from dotenv import find_dotenv, load_dotenv
+
 import deps
-from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(dotenv_path="./plugins/feelback/.env")
 

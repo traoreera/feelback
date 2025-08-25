@@ -1,5 +1,6 @@
-import deps
 from fasthtml.common import JSONResponse, Request
+
+import deps
 
 from .cruds.feelback import CrudFeelback
 from .pages.avis import avisPage

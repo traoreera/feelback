@@ -1,4 +1,3 @@
-from deps import AllPage
 from fasthtml.common import (
     H2,
     H3,
@@ -15,6 +14,8 @@ from fasthtml.common import (
     Section,
     Title,
 )
+
+from deps import AllPage
 
 
 class FeelBackHome:

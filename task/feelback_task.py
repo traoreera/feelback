@@ -36,7 +36,7 @@ metadata = {
     "keywords": ["mqtt", "feelback", "service", "plugins"],
     "created_at": "2023-10-01T00:00:00Z",
     "updated_at": "2023-10-01T00:00:00Z",
-    "license_url": "http://app.tangagroup.com/license",
+    "license_url": "https://app.tangagroup.com/license",
 }
 
 

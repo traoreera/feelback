@@ -7,7 +7,10 @@ class Feelbacks(deps.Base):
 
     __tablename__ = "feelbacks"
 
-    __table_args__ = (deps.UniqueConstraint("user_id", "topic", name="uq_user_topic"),)
+    __table_args__ = (
+        deps.UniqueConstraint("user_id", "topic", name="uq_user_topic"),
+        {"extend_existing": True},
+    )
 
     # for iditification
     id = deps.Column(deps.String, primary_key=True, index=True)
@@ -55,7 +58,7 @@ class Feelbacks(deps.Base):
 
 class Avis(deps.Base):
     __tablename__ = "avis"
-
+    __table_args__ = ({"extend_existing": True},)
     # for iditification
     id = deps.Column(deps.String, primary_key=True, index=True, unique=True)
     feelback_id = deps.Column(deps.String, nullable=False, index=True)
